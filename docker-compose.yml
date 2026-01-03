@@ -1,0 +1,9 @@
+services:
+  api-gateway:
+    image: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      AUTH_API: http://auth-service:8080
+      NOTES_API: http://notes-service:8080
+      HEALTH_API: http://health-service:8080
