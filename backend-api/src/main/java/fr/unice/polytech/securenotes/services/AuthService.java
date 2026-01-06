@@ -1,7 +1,7 @@
 package fr.unice.polytech.securenotes.services;
 
 import fr.unice.polytech.securenotes.models.User;
-import fr.unice.polytech.securenotes.storage.FileStorageService;
+import fr.unice.polytech.securenotes.services.StorageService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +14,8 @@ public class AuthService {
     
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
-    public NoteService() {
-        this.storageService = new FileStorageService();
+    public AuthService() {
+        this.storageService = new StorageService();
     }
 
     public User register(String username, String password, String email) throws IOException {

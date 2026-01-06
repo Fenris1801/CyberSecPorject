@@ -1,27 +1,26 @@
 package fr.unice.polytech.securenotes.models;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 import java.time.LocalDateTime;
 
+@Getter
 public class User {
+    @Setter
     private String id;
+    @Setter
     private String username;
+    @Setter
     private String passwordHash;
+    @Setter
     private String email;
-    private LocalDateTime createdAt;
+
+    private final LocalDateTime createdAt;
     
     public User() {
         this.id = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
     }
-    
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
 }

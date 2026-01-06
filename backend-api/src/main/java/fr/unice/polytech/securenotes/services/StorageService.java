@@ -2,8 +2,8 @@ package fr.unice.polytech.securenotes.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.notes.models.Note;
-import com.notes.models.User;
+import fr.unice.polytech.securenotes.models.Note;
+import fr.unice.polytech.securenotes.models.User;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class FileStorageService {
+public class StorageService {
     private final String STORAGE_DIR = "storage";
     private final String USERS_DIR = STORAGE_DIR + "/users";
     private final String NOTES_DIR = STORAGE_DIR + "/notes";
     private final ObjectMapper objectMapper;
     
-    public FileStorageService() {
+    public StorageService() {
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
         initializeDirectories();
