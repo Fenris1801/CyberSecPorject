@@ -24,21 +24,37 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        //TODO return AuthResponse
-        AuthResponse response = authService.register(request.username(), request.password(), request.email());
-        return ResponseEntity.ok(response);
+        User user;
+        try {
+            user = authService.register(request.username(), request.password(), request.email());
+        }
+        catch (IOException e) {  // problème au register
+            return ResponseEntity.badRequest().build();
+        }
+        if (user != null) {
+            String token = authService.generateToken(user.getId(), user.getUsername());
+            AuthResponse response = new AuthResponse(user.getId(), user.getUsername(), token);
+            return ResponseEntity.ok(response);
+        }
+
+        // si user null
+        return ResponseEntity.badRequest().build();
     }
 
     @PostMapping("/login")
-    //TODO return AuthResponse
-    public ResponseEntity<User> login(@RequestBody LoginRequest request) {
-        User response = null;
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        User user;
         try {
-            response = authService.login(request.username(), request.password());
+            user = authService.login(request.username(), request.password());
         } catch (IOException e) {
-            // TODO: renvoyer une erreur
-            //return ResponseEntity.of();
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(response);
+        if (user != null) {
+            String token = authService.generateToken(user.getId(), user.getUsername());
+            AuthResponse response = new AuthResponse(user.getId(), user.getUsername(), token);
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().build();
     }
-};
+}
