@@ -1,0 +1,25 @@
+{
+  "name": "cybersecporject",
+  "version": "1.0.0",
+  "description": "Software for storing and accessing personal textual notes security focused on abuses Cases",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fenris1801/CyberSecPorject.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Fenris1801/CyberSecPorject/issues"
+  },
+  "homepage": "https://github.com/Fenris1801/CyberSecPorject#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1"
+  }
+}

@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  backend:
+    build: ./
+    container_name: backend
+    ports:
+      - "8080:8080"
+
+  backend-backup:
+    build: ./
+    container_name: backend-backup
+    ports:
+      - "8081:8080"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - backend-backup

@@ -2,10 +2,15 @@ package fr.unice.polytech.securenotes.services;
 
 import fr.unice.polytech.securenotes.models.User;
 import fr.unice.polytech.securenotes.services.StorageService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.security.Key;
+import java.util.Date;
 
 @Service
 public class AuthService {
@@ -44,5 +49,16 @@ public class AuthService {
         }
         
         return user;
+    }
+
+    public String generateToken(String userId, String username) {
+        Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+        return Jwts.builder()
+                .setSubject(userId)
+                .claim("username", username)
+                .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1h
+                .signWith(key)
+                .compact();
     }
 }
