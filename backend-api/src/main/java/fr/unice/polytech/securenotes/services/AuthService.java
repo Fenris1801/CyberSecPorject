@@ -1,5 +1,6 @@
 package fr.unice.polytech.securenotes.services;
 
+import fr.unice.polytech.securenotes.JwtService;
 import fr.unice.polytech.securenotes.models.User;
 import fr.unice.polytech.securenotes.services.StorageService;
 import io.jsonwebtoken.Jwts;
@@ -14,13 +15,15 @@ import java.util.Date;
 
 @Service
 public class AuthService {
-    
+
+    private final JwtService jwtService;
     private StorageService storageService;
     
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
-    public AuthService() {
+    public AuthService(JwtService jwtService) {
         this.storageService = new StorageService();
+        this.jwtService = jwtService;
     }
 
     public User register(String username, String password, String email) throws IOException {
@@ -52,13 +55,6 @@ public class AuthService {
     }
 
     public String generateToken(String userId, String username) {
-        Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-        return Jwts.builder()
-                .setSubject(userId)
-                .claim("username", username)
-                .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1h
-                .signWith(key)
-                .compact();
+        return jwtService.generateToken(userId, username);
     }
 }
