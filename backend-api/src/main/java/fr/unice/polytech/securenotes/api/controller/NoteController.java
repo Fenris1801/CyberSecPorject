@@ -6,6 +6,8 @@ import fr.unice.polytech.securenotes.services.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -21,9 +23,9 @@ public class NoteController {
     // BASE
 
     @PostMapping("/create")
-    public ResponseEntity<NoteResponse> create(@RequestBody CreateNoteRequest request) {
+    public ResponseEntity<NoteResponse> create(@RequestBody CreateNoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            Note note = noteService.createNote(request.userId(), request.title(), request.content());
+            Note note = noteService.createNote(userId, request.title(), request.content());
             return ResponseEntity.status(HttpStatus.CREATED).body(mapToResponse(note));
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
@@ -31,9 +33,9 @@ public class NoteController {
     }
 
     @PostMapping("/get")
-    public ResponseEntity<NoteResponse> getNote(@RequestBody NoteRequest request) {
+    public ResponseEntity<NoteResponse> getNote(@RequestBody NoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            Note note = noteService.getNote(request.noteId(), request.userId());
+            Note note = noteService.getNote(request.noteId(), userId);
             return ResponseEntity.ok(mapToResponse(note));
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -43,9 +45,9 @@ public class NoteController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<NoteResponse> update(@RequestBody UpdateNoteRequest request) {
+    public ResponseEntity<NoteResponse> update(@RequestBody UpdateNoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            Note note = noteService.updateNote(request.noteId(), request.userId(), request.title(), request.content());
+            Note note = noteService.updateNote(request.noteId(), userId, request.title(), request.content());
             return ResponseEntity.ok(mapToResponse(note));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build(); // Verrouillée
@@ -57,9 +59,9 @@ public class NoteController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity<Void> delete(@RequestBody NoteRequest request) {
+    public ResponseEntity<Void> delete(@RequestBody NoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.deleteNote(request.noteId(), request.userId());
+            noteService.deleteNote(request.noteId(), userId);
             return ResponseEntity.ok().build();
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -71,9 +73,9 @@ public class NoteController {
     // --- PARTAGE ---
 
     @PostMapping("/share")
-    public ResponseEntity<Void> share(@RequestBody ShareRequest request) {
+    public ResponseEntity<Void> share(@RequestBody ShareRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.shareNote(request.noteId(), request.ownerId(), request.targetUserId(), request.permission());
+            noteService.shareNote(request.noteId(), userId, request.targetUserId(), request.permission());
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -81,9 +83,9 @@ public class NoteController {
     }
 
     @PostMapping("/revoke-share")
-    public ResponseEntity<Void> revokeShare(@RequestBody RevokeShareRequest request) {
+    public ResponseEntity<Void> revokeShare(@RequestBody RevokeShareRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.revokeShare(request.noteId(), request.ownerId(), request.targetUserId());
+            noteService.revokeShare(request.noteId(), userId, request.targetUserId());
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -93,9 +95,9 @@ public class NoteController {
     // --- VERROUILLAGE ---
 
     @PostMapping("/lock")
-    public ResponseEntity<Void> lock(@RequestBody NoteRequest request) {
+    public ResponseEntity<Void> lock(@RequestBody NoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.lockNote(request.noteId(), request.userId());
+            noteService.lockNote(request.noteId(), userId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -103,9 +105,9 @@ public class NoteController {
     }
 
     @PostMapping("/unlock")
-    public ResponseEntity<Void> unlock(@RequestBody NoteRequest request) {
+    public ResponseEntity<Void> unlock(@RequestBody NoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.unlockNote(request.noteId(), request.userId());
+            noteService.unlockNote(request.noteId(), userId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
