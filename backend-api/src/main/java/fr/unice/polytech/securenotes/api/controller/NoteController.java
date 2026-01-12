@@ -146,9 +146,9 @@ public class NoteController {
 
     // --- LISTES ---
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user")
     // TODO: should return a List<NoteResponse>
-    public ResponseEntity<List<Note>> getUserNotes(@PathVariable String userId) {
+    public ResponseEntity<List<Note>> getUserNotes(@AuthenticationPrincipal String userId) {
         try {
             List<Note> userNotes = noteService.getUserNotes(userId);
             userNotes.addAll(noteService.getSharedNotes(userId));

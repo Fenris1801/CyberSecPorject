@@ -238,7 +238,7 @@ function logout() {
 async function loadNotes() {
     ui.notesList.innerHTML = "";
     try {
-        const notes = await apiCall(`/notes/user/${currentUserId}`, "GET");
+        const notes = await apiCall(`/notes/user`, "GET");
 
         if (!Array.isArray(notes)) return;
 
