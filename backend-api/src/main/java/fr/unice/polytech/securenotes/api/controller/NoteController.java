@@ -2,6 +2,7 @@ package fr.unice.polytech.securenotes.api.controller;
 
 import fr.unice.polytech.securenotes.api.dto.note.*;
 import fr.unice.polytech.securenotes.models.Note;
+import fr.unice.polytech.securenotes.models.Share;
 import fr.unice.polytech.securenotes.services.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -72,6 +73,15 @@ public class NoteController {
 
     // --- PARTAGE ---
 
+    @PostMapping("/get-owner-name")
+    public ResponseEntity<GetOwnerNameResponse> getOwnerName(@RequestBody GetOwnerNameRequest request, @AuthenticationPrincipal String userId) {
+        try {
+            return ResponseEntity.ok(new GetOwnerNameResponse(noteService.getOwnerName(request.ownerId())));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PostMapping("/share")
     public ResponseEntity<Void> share(@RequestBody ShareRequest request, @AuthenticationPrincipal String userId) {
         try {
@@ -87,6 +97,26 @@ public class NoteController {
         try {
             noteService.revokeShare(request.noteId(), userId, request.targetUserId());
             return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // --- LISTE DES ACCÈS (PARTAGES) ---
+
+    @GetMapping("/{noteId}/access")
+    // TODO: change return to dto
+    public ResponseEntity<List<Share>> getNoteAccessList(@PathVariable String noteId, @AuthenticationPrincipal String userId) {
+        try {
+            Note note = noteService.getNote(noteId, userId);
+
+            if (!note.getOwnerId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.ok(note.getShares());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -117,9 +147,12 @@ public class NoteController {
     // --- LISTES ---
 
     @GetMapping("/user/{userId}")
+    // TODO: should return a List<NoteResponse>
     public ResponseEntity<List<Note>> getUserNotes(@PathVariable String userId) {
         try {
-            return ResponseEntity.ok(noteService.getUserNotes(userId));
+            List<Note> userNotes = noteService.getUserNotes(userId);
+            userNotes.addAll(noteService.getSharedNotes(userId));
+            return ResponseEntity.ok(userNotes);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }

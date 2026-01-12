@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.unice.polytech.securenotes.models.Share;
 
 public record ShareRequest(
-        @JsonProperty("note_id") String noteId,
-        @JsonProperty("target_user_id") String targetUserId,
-        @JsonProperty("permission") Share.SharePermission permission
+        @JsonProperty("noteId") String noteId,
+        @JsonProperty("targetUserId") String targetUserId,
+        @JsonProperty("permission") String permission
 ) {}

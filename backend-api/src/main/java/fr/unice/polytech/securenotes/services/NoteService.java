@@ -85,7 +85,11 @@ public class NoteService {
         return storageService.loadSharedNotes(userId);
     }
 
-    public void shareNote(String noteId, String ownerId, String targetUserId, Share.SharePermission permission) throws IOException {
+    public String getOwnerName(String ownerId) throws IOException {
+        return storageService.loadUser(ownerId).getUsername();
+    }
+
+    public void shareNote(String noteId, String ownerId, String targetUserId, String permission) throws IOException {
         Note note = storageService.loadNote(noteId);
         if (note == null) {
             throw new IllegalArgumentException("Note introuvable");

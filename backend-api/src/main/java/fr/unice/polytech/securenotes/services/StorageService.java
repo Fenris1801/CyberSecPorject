@@ -68,6 +68,9 @@ public class StorageService {
     }
     
     public Note loadNote(String noteId) throws IOException {
+        System.out.println(noteId);
+        System.out.println(Paths.get(NOTES_DIR, noteId + ".json"));
+        System.out.println(new File(NOTES_DIR + "/" + noteId + ".json").exists());
         Path filePath = Paths.get(NOTES_DIR, noteId + ".json");
         if (!Files.exists(filePath)) {
             return null;
