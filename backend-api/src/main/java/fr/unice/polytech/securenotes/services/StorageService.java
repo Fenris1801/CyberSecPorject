@@ -37,12 +37,12 @@ public class StorageService {
     }
     
     public void saveUser(User user) throws IOException {
-        Path filePath = Paths.get(USERS_DIR, user.getId() + ".json");
+        Path filePath = Paths.get(USERS_DIR, user.getId() + ".json").normalize();
         objectMapper.writeValue(filePath.toFile(), user);
     }
     
     public User loadUser(String userId) throws IOException {
-        Path filePath = Paths.get(USERS_DIR, userId + ".json");
+        Path filePath = Paths.get(USERS_DIR, userId + ".json").normalize();
         if (!Files.exists(filePath)) {
             return null;
         }
@@ -63,15 +63,12 @@ public class StorageService {
     }
     
     public void saveNote(Note note) throws IOException {
-        Path filePath = Paths.get(NOTES_DIR, note.getId() + ".json");
+        Path filePath = Paths.get(NOTES_DIR, note.getId() + ".json").normalize();
         objectMapper.writeValue(filePath.toFile(), note);
     }
     
     public Note loadNote(String noteId) throws IOException {
-        System.out.println(noteId);
-        System.out.println(Paths.get(NOTES_DIR, noteId + ".json"));
-        System.out.println(new File(NOTES_DIR + "/" + noteId + ".json").exists());
-        Path filePath = Paths.get(NOTES_DIR, noteId + ".json");
+        Path filePath = Paths.get(NOTES_DIR, noteId + ".json").normalize();
         if (!Files.exists(filePath)) {
             return null;
         }
@@ -79,7 +76,7 @@ public class StorageService {
     }
     
     public void deleteNote(String noteId) throws IOException {
-        Path filePath = Paths.get(NOTES_DIR, noteId + ".json");
+        Path filePath = Paths.get(NOTES_DIR, noteId + ".json").normalize();
         Files.deleteIfExists(filePath);
     }
     
