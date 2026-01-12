@@ -1,7 +1,6 @@
 package fr.unice.polytech.securenotes.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.unice.polytech.securenotes.models.Note;
 import fr.unice.polytech.securenotes.models.User;
 import jakarta.annotation.PostConstruct;
@@ -12,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +41,7 @@ public class StorageService {
 
     public void saveUser(User user, boolean updateTimestamp) throws IOException {
         if (updateTimestamp) user.setVersion(Instant.now().toEpochMilli());
-        Path filePath = Path.of(usersDir).resolve(user.getId() + ".json");
+        Path filePath = Path.of(usersDir).resolve(user.getId() + ".json").normalize();
         objectMapper.writeValue(filePath.toFile(), user);
     }
 
@@ -52,7 +50,7 @@ public class StorageService {
     }
 
     public User loadUser(String userId) throws IOException {
-        Path filePath = Path.of(usersDir).resolve(userId + ".json");
+        Path filePath = Path.of(usersDir).resolve(userId + ".json").normalize();
         if (!Files.exists(filePath)) return null;
         return objectMapper.readValue(filePath.toFile(), User.class);
     }
@@ -70,7 +68,7 @@ public class StorageService {
 
     public void saveNote(Note note, boolean updateTimestamp) throws IOException {
         if (updateTimestamp) note.setVersion(Instant.now().toEpochMilli());
-        Path filePath = Path.of(notesDir).resolve(note.getId() + ".json");
+        Path filePath = Path.of(notesDir).resolve(note.getId() + ".json").normalize();
         objectMapper.writeValue(filePath.toFile(), note);
     }
 
@@ -79,13 +77,13 @@ public class StorageService {
     }
 
     public Note loadNote(String noteId) throws IOException {
-        Path filePath = Path.of(notesDir).resolve(noteId + ".json");
+        Path filePath = Path.of(notesDir).resolve(noteId + ".json").normalize();
         if (!Files.exists(filePath)) return null;
         return objectMapper.readValue(filePath.toFile(), Note.class);
     }
 
     public void deleteNote(String noteId) throws IOException {
-        Path filePath = Path.of(notesDir).resolve(noteId + ".json");
+        Path filePath = Path.of(notesDir).resolve(noteId + ".json").normalize();
         Files.deleteIfExists(filePath);
     }
 
