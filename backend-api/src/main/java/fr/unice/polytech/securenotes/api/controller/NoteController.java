@@ -3,8 +3,11 @@ package fr.unice.polytech.securenotes.api.controller;
 import fr.unice.polytech.securenotes.api.dto.note.*;
 import fr.unice.polytech.securenotes.models.Note;
 import fr.unice.polytech.securenotes.models.Share;
+import fr.unice.polytech.securenotes.replication.ReplicationEntityType;
+import fr.unice.polytech.securenotes.replication.ReplicationJournal;
 import fr.unice.polytech.securenotes.services.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,9 +20,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
+    private final NoteService noteService;
+    private final ReplicationJournal journal;
 
-    @Autowired
-    private NoteService noteService;
+    public NoteController(NoteService noteService, ReplicationJournal journal) {
+        this.noteService = noteService;
+        this.journal = journal;
+    }
 
     // BASE
 
@@ -27,8 +34,12 @@ public class NoteController {
     public ResponseEntity<NoteResponse> create(@RequestBody CreateNoteRequest request, @AuthenticationPrincipal String userId) {
         try {
             Note note = noteService.createNote(userId, request.title(), request.content());
+
+            journal.add(ReplicationEntityType.NOTE, note, "create");
+
             return ResponseEntity.status(HttpStatus.CREATED).body(mapToResponse(note));
         } catch (IOException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -39,8 +50,10 @@ public class NoteController {
             Note note = noteService.getNote(request.noteId(), userId);
             return ResponseEntity.ok(mapToResponse(note));
         } catch (SecurityException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -49,6 +62,7 @@ public class NoteController {
     public ResponseEntity<NoteResponse> update(@RequestBody UpdateNoteRequest request, @AuthenticationPrincipal String userId) {
         try {
             Note note = noteService.updateNote(request.noteId(), userId, request.title(), request.content());
+            journal.add(ReplicationEntityType.NOTE, note, "update");
             return ResponseEntity.ok(mapToResponse(note));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build(); // Verrouillée
@@ -62,7 +76,8 @@ public class NoteController {
     @PostMapping("/delete")
     public ResponseEntity<Void> delete(@RequestBody NoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.deleteNote(request.noteId(), userId);
+            Note note = noteService.deleteNote(request.noteId(), userId);
+            journal.add(ReplicationEntityType.NOTE, note, "delete");
             return ResponseEntity.ok().build();
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -85,7 +100,8 @@ public class NoteController {
     @PostMapping("/share")
     public ResponseEntity<Void> share(@RequestBody ShareRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.shareNote(request.noteId(), userId, request.targetUserId(), request.permission());
+            Note note = noteService.shareNote(request.noteId(), userId, request.targetUserId(), request.permission());
+            journal.add(ReplicationEntityType.NOTE, note, "update");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -95,7 +111,8 @@ public class NoteController {
     @PostMapping("/revoke-share")
     public ResponseEntity<Void> revokeShare(@RequestBody RevokeShareRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.revokeShare(request.noteId(), userId, request.targetUserId());
+            Note note = noteService.revokeShare(request.noteId(), userId, request.targetUserId());
+            journal.add(ReplicationEntityType.NOTE, note, "update");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -127,7 +144,8 @@ public class NoteController {
     @PostMapping("/lock")
     public ResponseEntity<Void> lock(@RequestBody NoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.lockNote(request.noteId(), userId);
+            Note note = noteService.lockNote(request.noteId(), userId);
+            journal.add(ReplicationEntityType.NOTE, note, "update");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -137,7 +155,8 @@ public class NoteController {
     @PostMapping("/unlock")
     public ResponseEntity<Void> unlock(@RequestBody NoteRequest request, @AuthenticationPrincipal String userId) {
         try {
-            noteService.unlockNote(request.noteId(), userId);
+            Note note = noteService.unlockNote(request.noteId(), userId);
+            journal.add(ReplicationEntityType.NOTE, note, "update");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -154,6 +173,7 @@ public class NoteController {
             userNotes.addAll(noteService.getSharedNotes(userId));
             return ResponseEntity.ok(userNotes);
         } catch (IOException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }

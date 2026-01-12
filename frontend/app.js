@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:8080/api";
+const REMOTE_URL = "http://localhost:80"
+const API_URL = REMOTE_URL + "/api";
 
 // Récupération des infos session
 let currentUserId = sessionStorage.getItem("userId");
@@ -492,7 +493,7 @@ async function unlockNote(id) {
 async function checkHealth() {
     try {
         // J'ajoute le mode cors ici au cas où pour éviter les faux négatifs
-        await fetch(`${API_URL}/health`, { mode: "cors" });
+        await fetch(`${REMOTE_URL}/actuator/health`, { mode: "cors" });
         console.log("Backend OK");
     } catch (e) {
         console.error("Backend Down");

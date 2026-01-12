@@ -12,10 +12,10 @@ import java.util.List;
 @Service
 public class NoteService {
 
-    private StorageService storageService;
+    private final StorageService storageService;
 
-    public NoteService() {
-        this.storageService = new StorageService();
+    public NoteService(StorageService storageService) {
+        this.storageService = storageService;
     }
 
     public Note createNote(String userId, String title, String content) throws IOException {
@@ -25,10 +25,11 @@ public class NoteService {
         note.setContent(content);
 
         storageService.saveNote(note);
+        System.out.println(note.getVersion());
         return note;
     }
 
-    public Note getNote(String noteId, String userId) throws IOException, IOException {
+    public Note getNote(String noteId, String userId) throws IOException {
         Note note = storageService.loadNote(noteId);
         if (note == null) {
             throw new IllegalArgumentException("Note introuvable");
@@ -64,7 +65,7 @@ public class NoteService {
         return note;
     }
 
-    public void deleteNote(String noteId, String userId) throws IOException {
+    public Note deleteNote(String noteId, String userId) throws IOException {
         Note note = storageService.loadNote(noteId);
         if (note == null) {
             throw new IllegalArgumentException("Note introuvable");
@@ -75,6 +76,7 @@ public class NoteService {
         }
 
         storageService.deleteNote(noteId);
+        return note;
     }
 
     public List<Note> getUserNotes(String userId) throws IOException {
@@ -89,7 +91,7 @@ public class NoteService {
         return storageService.loadUser(ownerId).getUsername();
     }
 
-    public void shareNote(String noteId, String ownerId, String targetUserId, String permission) throws IOException {
+    public Note shareNote(String noteId, String ownerId, String targetUserId, String permission) throws IOException {
         Note note = storageService.loadNote(noteId);
         if (note == null) {
             throw new IllegalArgumentException("Note introuvable");
@@ -104,9 +106,10 @@ public class NoteService {
         note.getShares().add(newShare);
 
         storageService.saveNote(note);
+        return note;
     }
 
-    public void revokeShare(String noteId, String ownerId, String targetUserId) throws IOException {
+    public Note revokeShare(String noteId, String ownerId, String targetUserId) throws IOException {
         Note note = storageService.loadNote(noteId);
         if (note == null) {
             throw new IllegalArgumentException("Note introuvable");
@@ -118,9 +121,10 @@ public class NoteService {
 
         note.getShares().removeIf(s -> s.getUserId().equals(targetUserId));
         storageService.saveNote(note);
+        return note;
     }
 
-    public void lockNote(String noteId, String userId) throws IOException {
+    public Note lockNote(String noteId, String userId) throws IOException {
         Note note = storageService.loadNote(noteId);
         if (note == null) {
             throw new IllegalArgumentException("Note introuvable");
@@ -136,9 +140,10 @@ public class NoteService {
 
         note.setLockedBy(userId);
         storageService.saveNote(note);
+        return note;
     }
 
-    public void unlockNote(String noteId, String userId) throws IOException {
+    public Note unlockNote(String noteId, String userId) throws IOException {
         Note note = storageService.loadNote(noteId);
         if (note == null) {
             throw new IllegalArgumentException("Note introuvable");
@@ -150,6 +155,7 @@ public class NoteService {
 
         note.setLockedBy(null);
         storageService.saveNote(note);
+        return note;
     }
 
 
@@ -170,5 +176,13 @@ public class NoteService {
         return note.getShares().stream()
                 .anyMatch(share -> share.getUserId().equals(userId)
                         && share.getPermission() == Share.SharePermission.READ_WRITE);
+    }
+
+    public void saveReplica(Note note) throws IOException {
+        this.storageService.saveNote(note, false);
+    }
+
+    public List<Note> getAll() throws IOException {
+        return this.storageService.loadAllNotes();
     }
 }

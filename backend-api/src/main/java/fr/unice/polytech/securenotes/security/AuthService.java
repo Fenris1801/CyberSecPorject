@@ -1,28 +1,24 @@
-package fr.unice.polytech.securenotes.services;
+package fr.unice.polytech.securenotes.security;
 
-import fr.unice.polytech.securenotes.JwtService;
+import fr.unice.polytech.securenotes.models.Note;
 import fr.unice.polytech.securenotes.models.User;
 import fr.unice.polytech.securenotes.services.StorageService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.security.Key;
-import java.util.Date;
+import java.util.List;
 
 @Service
 public class AuthService {
 
     private final JwtService jwtService;
-    private StorageService storageService;
+    private final StorageService storageService;
     
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
-    public AuthService(JwtService jwtService) {
-        this.storageService = new StorageService();
+    public AuthService(JwtService jwtService, StorageService storageService) {
+        this.storageService = storageService;
         this.jwtService = jwtService;
     }
 
@@ -56,5 +52,13 @@ public class AuthService {
 
     public String generateToken(String userId, String username) {
         return jwtService.generateToken(userId, username);
+    }
+
+    public void saveReplica(User user) throws IOException {
+        this.storageService.saveUser(user, false);
+    }
+
+    public List<User> getAll() throws IOException {
+        return this.storageService.loadAllUsers();
     }
 }
